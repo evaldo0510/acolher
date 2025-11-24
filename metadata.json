@@ -1,0 +1,7 @@
+{
+  "name": "Acolher",
+  "description": "A comprehensive super-app designed to support mothers of neurodivergent children, featuring daily management tools, a marketplace, and gamified rewards.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
