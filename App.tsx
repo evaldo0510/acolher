@@ -9,7 +9,7 @@ import {
   Clock, FileText, BookHeart, Lock, CloudRain, Navigation, 
   Utensils, Bath, Gamepad2, BookOpen, Music, Droplets,
   HeartHandshake, Edit3, Info, Check, LogOut,
-  Megaphone, Wifi, WifiOff, Sliders, DollarSign, CheckCircle, PlusCircle, Bell, Upload, Palmtree
+  Megaphone, Wifi, WifiOff, Sliders, DollarSign, CheckCircle, PlusCircle, Bell, Upload, Palmtree, RefreshCw
 } from 'lucide-react';
 
 // --- FIREBASE IMPORTS ---
@@ -1290,4 +1290,102 @@ const AcolherSuperApp = () => {
             <form onSubmit={(e) => { handleSaveProfile(e); setIsEditing(false); }} className="space-y-3 animate-in fade-in">
               <h3 className="text-sm font-bold text-indigo-600 mb-2">Editar Perfil</h3>
               <input name="name" defaultValue={userProfile.momName} placeholder="Seu Nome" className="w-full text-sm bg-slate-50 border border-slate-200 rounded-lg p-2 text-center outline-none focus:border-indigo-500" required />
-              <input name="childName" defaultValue={userProfile.childName} placeholder="Nome da Criança" className="w-
+              <input name="childName" defaultValue={userProfile.childName} placeholder="Nome da Criança" className="w-full text-sm bg-slate-50 border border-slate-200 rounded-lg p-2 text-center outline-none focus:border-indigo-500" required />
+              <input name="cep" defaultValue={userProfile.cep} placeholder="Seu CEP" className="w-full text-sm bg-slate-50 border border-slate-200 rounded-lg p-2 text-center outline-none focus:border-indigo-500" required />
+              <button type="submit" className="bg-indigo-600 text-white text-xs font-bold px-6 py-2 rounded-full shadow-md hover:bg-indigo-700 transition-colors">Salvar Dados</button>
+            </form>
+          )}
+        </div>
+
+        <div className="p-6 space-y-6 flex-1 overflow-y-auto">
+          <div>
+             <h3 className="font-bold text-slate-700 mb-3 ml-1 flex items-center gap-2"><BookHeart className="text-purple-600" size={18}/> Meu Diário (Sincronizado)</h3>
+             <div className="space-y-3">
+               {logs.filter(l => l.type === 'mom_journal').length === 0 ? 
+                 <div className="bg-purple-50 border border-dashed border-purple-200 p-4 rounded-xl text-center text-sm text-purple-600 italic">Seu espaço seguro. Escreva seu primeiro desabafo hoje.</div> :
+                 logs.filter(l => l.type === 'mom_journal').map(log => (
+                   <div key={log.id} className="bg-white p-4 rounded-xl border-l-4 border-purple-400 shadow-sm">
+                      <div className="flex justify-between mb-1">
+                        {/* @ts-ignore */}
+                        <div className="flex items-center gap-2"><span className="text-xs font-bold text-purple-600">{log.date}</span>{log.mood==='good'?<Smile size={14} className="text-green-500"/>:log.mood==='neutral'?<Sun size={14} className="text-yellow-500"/>:log.mood==='tired'?<Moon size={14} className="text-blue-500"/>:<CloudRain size={14} className="text-red-500"/>}</div><Lock size={12} className="text-slate-300"/>
+                      </div>
+                      <p className="text-sm text-slate-700 italic">"{log.note}"</p>
+                   </div>
+                 ))
+               }
+             </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const FileTextIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>;
+
+  // --- NAVEGAÇÃO ---
+  return (
+    <div className="h-screen bg-slate-50 flex flex-col font-sans max-w-md mx-auto shadow-2xl overflow-hidden relative border-x border-slate-200">
+      <OfflineIndicator />
+      {activeModal === 'sell' && <SellModal />}
+      {activeModal === 'report' && <ReportModal />}
+      {activeModal === 'sos' && <SOSModal />}
+      {activeModal === 'chat' && <ChatModal />}
+      {activeModal === 'log' && <LogModal />}
+      {activeModal === 'journal' && <JournalModal />}
+      {activeModal === 'settings' && <SettingsModal />}
+      {activeModal === 'location' && <LocationModal />}
+      {activeModal === 'event' && <EventModal />}
+      {activeModal === 'about' && <AboutModal />}
+      {activeModal === 'addEvent' && <AddEventModal />}
+      {activeModal === 'camera' && <CameraModal />}
+      
+      <RewardToast />
+
+      <div className="flex-1 overflow-y-auto scrollbar-hide bg-slate-50 pt-6">
+        {onboardingStep < 3 ? (
+           <div className="h-full overflow-hidden">{/* Onboarding renderizado condicionalmente acima */}</div>
+        ) : (
+           <>
+            {activeTab === 'home' && <SmartHome />}
+            {activeTab === 'community' && <CommunityHub />}
+            {activeTab === 'explore' && <ExploreMap />}
+            {activeTab === 'market' && <MarketHub />}
+            {activeTab === 'profile' && <ProfileView />}
+           </>
+        )}
+      </div>
+
+      {onboardingStep === 3 && (
+        <>
+          {activeTab === 'home' && (
+            <div className="absolute bottom-20 left-0 w-full px-4 z-20">
+               <div className="bg-white/90 backdrop-blur-md border border-slate-200 p-2 rounded-full shadow-lg flex gap-2 items-center">
+                 <button className="p-3 bg-slate-100 rounded-full text-slate-500 hover:text-red-500 transition-colors"><Mic size={20} /></button>
+                 <input className="flex-1 bg-transparent outline-none text-sm placeholder:text-slate-400" placeholder="Digite algo rápido..." value={quickInput} onChange={(e) => setQuickInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && saveLog("Nota Rápida", "note", quickInput)} />
+                 <button className={`p-3 rounded-full text-white transition-all ${quickInput ? 'bg-indigo-600 scale-100' : 'bg-slate-300 scale-90'}`} onClick={() => quickInput && saveLog("Nota Rápida", "note", quickInput)}><Send size={18} /></button>
+               </div>
+            </div>
+          )}
+
+          <div className="bg-white px-4 py-4 flex justify-between items-center pb-6 z-20 shadow-[0_-5px_20px_rgba(0,0,0,0.05)] rounded-t-3xl">
+            <NavButton icon={Home} label="Hoje" active={activeTab === 'home'} onClick={() => setActiveTab('home')} />
+            <NavButton icon={Map} label="Mapa" active={activeTab === 'explore'} onClick={() => setActiveTab('explore')} />
+            <NavButton icon={ShoppingBag} label="Loja" active={activeTab === 'market'} onClick={() => setActiveTab('market')} />
+            <NavButton icon={Users} label="Tribo" active={activeTab === 'community'} onClick={() => setActiveTab('community')} />
+            <NavButton icon={User} label="Perfil" active={activeTab === 'profile'} onClick={() => setActiveTab('profile')} />
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
+// @ts-ignore
+const NavButton = ({ icon: Icon, label, active, onClick }) => (
+  <button onClick={onClick} className={`flex flex-col items-center gap-1 transition-all duration-300 ${active ? 'text-indigo-600 scale-110' : 'text-slate-300 hover:text-slate-400'}`}>
+    <Icon size={22} className={active ? 'fill-indigo-100' : ''} />
+    <span className="text-[9px] font-bold">{label}</span>
+  </button>
+);
+
+export default AcolherSuperApp;
